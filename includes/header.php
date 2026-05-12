@@ -105,7 +105,7 @@ $display_logo = !empty($settings['logo_path']) ? $settings['logo_path'] : "";
                     <a class="btn btn-logout nav-link" href="auth/logout.php">Logout</a>
                 </div>
             <?php else: ?>
-                <!-- <a class="btn btn-login nav-link" href="auth/login.php">Login</a> -->
+                <a class="btn btn-login nav-link" href="auth/login.php">Login</a>
             <?php endif; ?>
           </li>
         </ul>

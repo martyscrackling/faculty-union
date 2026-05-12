@@ -1,12 +1,15 @@
 <?php
 require_once('class/database.php');
 $database = new Database();
-// Ensure your Database class uses PDO for the getConnection() method
 $db = $database->getConnection();
 
+$today = date('Y-m-d');
+
 try {
-    // We select all columns from the 'events' table
-    $events_query = $db->query("SELECT * FROM events ORDER BY created_at DESC");
+    // Filter directly in SQL: only records where the date is today or in the future
+    $query = "SELECT * FROM events WHERE event_start_date >= :today ORDER BY event_start_date ASC";
+    $events_query = $db->prepare($query);
+    $events_query->execute(['today' => $today]);
     $events = $events_query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { 
     $events = []; 
@@ -65,14 +68,15 @@ try {
                     <?php if (!empty($events)): ?>
                         <?php foreach ($events as $row): ?>
                             <?php 
-                                // Map 'subtitle' from database to the 'tag' variable for the script
                                 $tag = isset($row['subtitle']) ? addslashes($row['subtitle']) : ''; 
+                                // Format date for the card display
+                                $displayDate = date("M d, Y", strtotime($row['event_start_date']));
                             ?>
                             <div class="event-clickable" onclick="showEvent(
                                 '<?php echo addslashes($row['title']); ?>', 
                                 '<?php echo addslashes($row['description']); ?>', 
                                 '<?php echo $row['banner_path']; ?>', 
-                                '<?php echo $row['event_dates']; ?>', 
+                                '<?php echo $displayDate; ?>', 
                                 '<?php echo $row['location']; ?>', 
                                 '<?php echo $row['event_time']; ?>', 
                                 '<?php echo $row['admission']; ?>', 
@@ -86,7 +90,7 @@ try {
                                             <h3><?php echo htmlspecialchars($row['title']); ?></h3>
                                             
                                             <div class="entry-meta">
-                                                <span class="posted-on"><i class="far fa-calendar-alt"></i> <?php echo htmlspecialchars($row['event_dates']); ?></span>
+                                                <span class="posted-on"><i class="far fa-calendar-alt"></i> <?php echo $displayDate; ?></span>
                                             </div>
 
                                             <?php if(!empty($row['subtitle'])): ?>
@@ -169,7 +173,6 @@ function hideEvent() {
     document.getElementById('eventDetailOverlay').style.display = 'none';
 }
 
-// Close modal if user clicks outside the modal card
 window.onclick = function(event) {
     if (event.target == document.getElementById('eventDetailOverlay')) {
         hideEvent();

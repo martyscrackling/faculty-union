@@ -17,14 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
     $subtitle = $_POST['subtitle'];
     $desc = $_POST['description'];
-    $dates = $_POST['event_dates'];
+    
+    // We now use start_date for both the logic AND the display column to prevent errors
+    $start_date = $_POST['event_start_date']; 
+    
     $loc = $_POST['location'];
     $time = $_POST['event_time'];
     $adm = $_POST['admission'];
-    $feat = $_POST['features'];
     $high = $_POST['highlights'];
     
-    // Simple Image Upload Logic
+    // Image Upload Logic
     $banner = $_POST['current_banner'] ?? 'img/event-default.jpg';
     if (!empty($_FILES['banner']['name'])) {
         $target = "../img/" . time() . "_" . $_FILES['banner']['name'];
@@ -34,21 +36,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (isset($_POST['id']) && !empty($_POST['id'])) {
-        // Update
-        $sql = "UPDATE events SET title=?, subtitle=?, description=?, event_dates=?, location=?, event_time=?, admission=?, features=?, highlights=?, banner_path=? WHERE id=?";
+        // Update existing: event_dates is filled with $start_date to satisfy DB constraints
+        $sql = "UPDATE events SET title=?, subtitle=?, description=?, event_dates=?, event_start_date=?, location=?, event_time=?, admission=?, highlights=?, banner_path=? WHERE id=?";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$title, $subtitle, $desc, $dates, $loc, $time, $adm, $feat, $high, $banner, $_POST['id']]);
+        $stmt->execute([$title, $subtitle, $desc, $start_date, $start_date, $loc, $time, $adm, $high, $banner, $_POST['id']]);
     } else {
-        // Insert
-        $sql = "INSERT INTO events (title, subtitle, description, event_dates, location, event_time, admission, features, highlights, banner_path) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        // Insert new
+        $sql = "INSERT INTO events (title, subtitle, description, event_dates, event_start_date, location, event_time, admission, highlights, banner_path) VALUES (?,?,?,?,?,?,?,?,?,?)";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$title, $subtitle, $desc, $dates, $loc, $time, $adm, $feat, $high, $banner]);
+        $stmt->execute([$title, $subtitle, $desc, $start_date, $start_date, $loc, $time, $adm, $high, $banner]);
     }
     header("Location: manage_events.php?msg=Success");
     exit();
 }
 
-$events = $db->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+$events = $db->query("SELECT * FROM events ORDER BY event_start_date DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +79,7 @@ $events = $db->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(
             <thead>
                 <tr>
                     <th>Event Title</th>
-                    <th>Date</th>
+                    <th>Event Date</th>
                     <th>Location</th>
                     <th>Actions</th>
                 </tr>
@@ -86,7 +88,7 @@ $events = $db->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(
                 <?php foreach($events as $e): ?>
                 <tr>
                     <td><strong><?php echo htmlspecialchars($e['title']); ?></strong></td>
-                    <td><?php echo htmlspecialchars($e['event_dates']); ?></td>
+                    <td><?php echo date("M d, Y", strtotime($e['event_start_date'])); ?></td>
                     <td><?php echo htmlspecialchars($e['location']); ?></td>
                     <td>
                         <button class="btn btn-sm btn-info edit-btn" 
@@ -94,11 +96,10 @@ $events = $db->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(
                             data-title="<?php echo htmlspecialchars($e['title']); ?>"
                             data-subtitle="<?php echo htmlspecialchars($e['subtitle']); ?>"
                             data-desc="<?php echo htmlspecialchars($e['description']); ?>"
-                            data-dates="<?php echo htmlspecialchars($e['event_dates']); ?>"
+                            data-start-date="<?php echo htmlspecialchars($e['event_start_date']); ?>"
                             data-loc="<?php echo htmlspecialchars($e['location']); ?>"
                             data-time="<?php echo htmlspecialchars($e['event_time']); ?>"
                             data-adm="<?php echo htmlspecialchars($e['admission']); ?>"
-                            data-feat="<?php echo htmlspecialchars($e['features']); ?>"
                             data-high="<?php echo htmlspecialchars($e['highlights']); ?>"
                             data-banner="<?php echo $e['banner_path']; ?>"
                             data-toggle="modal" data-target="#eventModal">Edit</button>
@@ -131,23 +132,28 @@ $events = $db->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(
                 </div>
 
                 <div class="form-group">
-                    <label>Description (About the Event)</label>
+                    <label>Description</label>
                     <textarea name="description" id="description" class="form-control" rows="3" required></textarea>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 form-group"><label>Dates</label><input type="text" name="event_dates" id="event_dates" class="form-control" placeholder="Dec 1-10, 2025"></div>
-                    <div class="col-md-4 form-group"><label>Location</label><input type="text" name="location" id="location" class="form-control" placeholder="Faculty Union Hall"></div>
-                    <div class="col-md-4 form-group"><label>Time</label><input type="text" name="event_time" id="event_time" class="form-control" placeholder="8:00 AM - 5:00 PM"></div>
+                    <div class="col-md-6 form-group">
+                        <label>Event Date</label>
+                        <input type="date" name="event_start_date" id="event_start_date" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" id="location" class="form-control">
+                    </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 form-group"><label>Admission</label><input type="text" name="admission" id="admission" class="form-control" placeholder="Free Entry"></div>
-                    <div class="col-md-6 form-group"><label>Featuring/Features</label><input type="text" name="features" id="features" class="form-control" placeholder="Arts, Music, etc."></div>
+                    <div class="col-md-6 form-group"><label>Time</label><input type="text" name="event_time" id="event_time" class="form-control"></div>
+                    <div class="col-md-6 form-group"><label>Admission</label><input type="text" name="admission" id="admission" class="form-control"></div>
                 </div>
 
                 <div class="form-group">
-                    <label>Highlights (One per line)</label>
+                    <label>Highlights</label>
                     <textarea name="highlights" id="highlights" class="form-control" rows="3"></textarea>
                 </div>
 
@@ -172,18 +178,18 @@ $('.edit-btn').click(function() {
     $('#title').val($(this).data('title'));
     $('#subtitle').val($(this).data('subtitle'));
     $('#description').val($(this).data('desc'));
-    $('#event_dates').val($(this).data('dates'));
+    $('#event_start_date').val($(this).data('start-date'));
     $('#location').val($(this).data('loc'));
     $('#event_time').val($(this).data('time'));
     $('#admission').val($(this).data('adm'));
-    $('#features').val($(this).data('feat'));
     $('#highlights').val($(this).data('high'));
     $('#current_banner').val($(this).data('banner'));
 });
 
 function clearForm() {
     $('#event_id').val('');
-    $('.modal-body input, .modal-body textarea').val('');
+    $('#current_banner').val('');
+    $('.modal-body input:not([type=hidden]), .modal-body textarea').val('');
 }
 </script>
 </body>

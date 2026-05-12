@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2026 at 03:06 AM
+-- Generation Time: May 12, 2026 at 11:52 PM
 -- Server version: 11.7.2-MariaDB
 -- PHP Version: 8.2.12
 
@@ -65,7 +65,9 @@ CREATE TABLE `admin_videos` (
 --
 
 INSERT INTO `admin_videos` (`id`, `video_title`, `video_type`, `video_source`, `thumbnail`, `created_at`) VALUES
-(1, 'TEAM UNITY WITH CARE 2 0 ', 'youtube', 'https://www.youtube.com/embed/_f48t-J88yU', NULL, '2026-04-22 09:19:59');
+(1, 'TEAM UNITY WITH CARE 2 0 ', 'youtube', 'https://www.youtube.com/embed/_f48t-J88yU', NULL, '2026-04-22 09:19:59'),
+(2, '3 PHILBRITISIH INSURANCE', 'youtube', 'https://www.youtube.com/embed/2U4VXtLQWyk', NULL, '2026-04-23 01:46:25'),
+(3, ' Financial Literacy', 'youtube', 'https://www.youtube.com/embed/z6HTNoqnhqs', NULL, '2026-04-23 01:47:47');
 
 -- --------------------------------------------------------
 
@@ -90,8 +92,8 @@ CREATE TABLE `awards` (
 INSERT INTO `awards` (`id`, `award_title`, `recipient_name`, `award_image`, `description`, `award_year`, `created_at`) VALUES
 (2, 'kupal award', 'danch', 'uploads/awards/1776823752_327744610_733922131720223_8935806063694028935_n.jpg', 'rdtfhjkljghfcjkhlityfhbyukgv', '2026', '2026-04-22 02:09:12'),
 (3, 'kupals award', 'danc', 'uploads/awards/1776824217_328258926_849097926181436_2427018608687281411_n.jpg', 'lljhtgghfghjkputaehxfhvjbkllfgfdv', '2026', '2026-04-22 02:16:57'),
-(4, 'pabida award', 'danchio', 'uploads/awards/1776824266_476080601_1180706744062389_5378603482475314303_n.jpg', 'srdytgihopioiuytjfjxhcvjkjopouyudtkghvjkbljoytyutddhjgi;itluketydhgjgiyety', '2026', '2026-04-22 02:17:46'),
-(5, 'pabida awards', 'danchion', 'uploads/awards/1776824333_475872352_1056083876564843_4556632453379750438_n.jpg', 'hkkjggggggggggggggggggggggggggggggggggg', '2026', '2026-04-22 02:18:53');
+(4, 'pabida award', 'danchio', 'uploads/awards/1776824266_476080601_1180706744062389_5378603482475314303_n.jpg', 'srdytgihopioiuytjfjxhcvjkjopouyudtkghv', '2026', '2026-04-22 02:17:46'),
+(5, 'pabida awards', 'danchion', 'uploads/awards/1776912028_visual_01.jpg', 'hkkjggggggggggggggggggggggggggggggggggg', '2026', '2026-04-22 02:18:53');
 
 -- --------------------------------------------------------
 
@@ -127,6 +129,7 @@ CREATE TABLE `events` (
   `id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `subtitle` varchar(255) DEFAULT NULL,
+  `event_start_date` date NOT NULL,
   `banner_path` varchar(255) DEFAULT 'img/event-default.jpg',
   `description` text NOT NULL,
   `event_dates` varchar(100) NOT NULL,
@@ -142,9 +145,10 @@ CREATE TABLE `events` (
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `subtitle`, `banner_path`, `description`, `event_dates`, `location`, `event_time`, `admission`, `features`, `highlights`, `created_at`) VALUES
-(1, 'Dan Chion', 'danley kwero', 'img/1776810325_Screenshot 2024-11-29 045023.png', 'trtikdcvhbjkfcghjnkmfghjk rdftvbjnmk,trtfygjhdxcvgbntrtghbn xcvbnmsdfghjxcvbnmdsf ghjkm  xcvybinoertvbunxxcvbhmktfghjk', 'Dec 09-2028', 'Faculty Union Hall', '9:00am - 8:00pm', 'Free Entry', 'dfghjklxcvbnm', 'fcgbhjklfgvhbjml,fcgvbjnkxgvbm', '2026-04-21 22:25:25'),
-(2, 'Chiong', 'Danch', 'img/1776819302_Screenshot 2025-12-17 222615.png', 'waertfyuiopyedrutghujioprtvubituxctvbiu', 'Dec 09-2028', 'Faculty Union Hall', '9:00am - 8:00pm', 'Free Entry', 'dfghjklxcvbnm', 'rwetrbumobueyervnml,oiuytuyatwunmoihyfsyatryuiompjhtgehyiojhudraewtrybuyurttwety', '2026-04-22 00:55:02');
+INSERT INTO `events` (`id`, `title`, `subtitle`, `event_start_date`, `banner_path`, `description`, `event_dates`, `location`, `event_time`, `admission`, `features`, `highlights`, `created_at`) VALUES
+(1, 'Dan Chion', '', '2022-12-22', 'img/1776810325_Screenshot 2024-11-29 045023.png', 'trtikdcvhbjkfcghjnkmfghjk rdftvbjnmk,trtfygjhdxcvgbntrtghbn xcvbnmsdfghjxcvbnmdsf ghjkm  xcvybinoertvbunxxcvbhmktfghjk', '', 'Faculty Union Hall', '', '', NULL, '', '2026-04-21 22:25:25'),
+(2, 'Chiong', 'Danch', '2028-12-09', 'img/1776819302_Screenshot 2025-12-17 222615.png', 'waertfyuiopyedrutghujioprtvubituxctvbiu', 'Dec 09-2023', 'Faculty Union Hall', '9:00am - 8:00pm', 'Free Entry', 'dfghjklxcvbnm', 'rwetrbumobueyervnml,oiuytuyatwunmoihyfsyatryuiompjhtgehyiojhudraewtrybuyurttwety', '2026-04-22 00:55:02'),
+(3, 'dandan', 'Danchi', '2028-05-13', 'img/1778622556_singer_1.jpg', 'iugfdsaiuhgfdsauytfd', '', 'Faculty Union Hall', '9:00am - 8:00pm', '200', NULL, 'urtjyhuytftghfgytrfg8', '2026-05-12 21:49:16');
 
 -- --------------------------------------------------------
 
@@ -174,7 +178,7 @@ INSERT INTO `objectives` (`id`, `content`, `sort_order`) VALUES
 (9, 'To promote faculty participation in WMSU’s institutional governance;', 3),
 (10, 'To advance the rights and welfare of the academic personnel;', 4),
 (11, 'To promote fair environment and protect faculty from arbitrary decisions;', 5),
-(12, 'To improve the status and conditions of faculty members.', 6);
+(14, 'To improve the status and conditions of faculty members.', 0);
 
 -- --------------------------------------------------------
 
@@ -243,7 +247,7 @@ CREATE TABLE `union_info` (
 --
 
 INSERT INTO `union_info` (`id`, `vision`, `updated_at`) VALUES
-(1, 'A united and independent faculty union that cares for the rights and welfare of the WMSU FACULTY, with strong collective voice gearing towards equitable access to professional development, opportunities, and healthy working environment.', '2026-04-20 09:58:28');
+(1, 'A united and independent faculty union that cares for the rights and welfare of the WMSU FACULTY, with strong collective voice gearing towards equitable access to professional development, opportunities, and healthy working environment. rghjo', '2026-04-23 02:31:11');
 
 -- --------------------------------------------------------
 
@@ -402,7 +406,7 @@ ALTER TABLE `about_content`
 -- AUTO_INCREMENT for table `admin_videos`
 --
 ALTER TABLE `admin_videos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `awards`
@@ -420,13 +424,13 @@ ALTER TABLE `contact_info`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `objectives`
 --
 ALTER TABLE `objectives`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `officers`

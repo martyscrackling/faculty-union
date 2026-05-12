@@ -70,7 +70,7 @@ try {
 <section id="videos">
     <div class="container">
         <div class="section-title text-center">
-            <h2 style="color: var(--maroon); font-weight: 800; font-size: 2.2rem;">LATEST VIDEO HIGHLIGHTS</h2>
+            <h2 style="color: var(--maroon); font-weight: 800; font-size: 2.2rem;">VIDEO HIGHLIGHTS</h2>
             <div style="width: 60px; height: 4px; background: var(--gold); margin: 5px auto 0;"></div>
         </div>
 
