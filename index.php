@@ -24,7 +24,7 @@
     <?php include('./includes/videos.php');?>
 
     <!-- Contact Section -->
-    <?php include('./includes/contact.php');?>
+    <!-- <?php include('./includes/contact.php');?> -->
 
 </main>
 

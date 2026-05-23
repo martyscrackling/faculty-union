@@ -4,13 +4,16 @@ $database = new Database();
 $db = $database->getConnection();
 
 $today = date('Y-m-d');
+$events = [];
 
 try {
-    // Filter directly in SQL: only records where the date is today or in the future
-    $query = "SELECT * FROM events WHERE event_start_date >= :today ORDER BY event_start_date ASC";
-    $events_query = $db->prepare($query);
-    $events_query->execute(['today' => $today]);
-    $events = $events_query->fetchAll(PDO::FETCH_ASSOC);
+    if ($db instanceof PDO) {
+        // Filter directly in SQL: only records where the date is today or in the future
+        $query = "SELECT * FROM events WHERE event_start_date >= :today ORDER BY event_start_date ASC";
+        $events_query = $db->prepare($query);
+        $events_query->execute(['today' => $today]);
+        $events = $events_query->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) { 
     $events = []; 
 }

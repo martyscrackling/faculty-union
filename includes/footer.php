@@ -1,3 +1,26 @@
+<?php
+// Load contact info from DB with safe fallbacks
+require_once(__DIR__ . '/../class/database.php');
+$database = new Database();
+$db = $database->getConnection();
+try {
+    if ($db instanceof PDO) {
+        $contact_query = $db->query("SELECT * FROM contact_info WHERE id = 1");
+        $contact = $contact_query->fetch(PDO::FETCH_ASSOC);
+    } else {
+        $contact = false;
+    }
+} catch (Exception $e) {
+    $contact = false;
+}
+$address = $contact['address'] ?? '2nd Floor, Executive Bldg, WMSU Main Campus';
+$phone = $contact['phone'] ?? '+63 62 991 1771';
+$hours = $contact['hours'] ?? '';
+$email = $contact['email'] ?? 'facultyunion@wmsu.edu.ph';
+$fb_url = $contact['facebook_url'] ?? 'https://www.facebook.com/WMSUFacultyUnion';
+$fb_name = $contact['facebook_name'] ?? 'WMSU Faculty Union';
+?>
+
 <style>
     /* Ultra-compressed footer settings */
     .footer {
@@ -85,11 +108,12 @@
             
             <div class="col-lg-3 text-center text-lg-start mb-3 mb-lg-0">
                 <a href="index.php" class="d-inline-block mb-1">
-                    <img src="img/faculty-union-logo-white.png" alt="Logo" style="max-height: 40px;">
+                    <img src="images/facultyunion.png" alt="Logo" style="max-height: 60px;">
+                    <img src="images/wmsu.png" alt="Logo" style="max-height: 60px;">
                 </a>
                 <p class="small mb-2" style="line-height: 1.4;">Upholding Faculty Rights and Academic Freedom.</p>
-                <div class="social-links d-flex justify-content-center justify-content-lg-start">
-                    <a href="https://www.facebook.com/WMSUFacultyUnion" target="_blank"><i class="bi bi-facebook"></i></a>
+                    <div class="social-links d-flex justify-content-center justify-content-lg-start">
+                    <a href="<?php echo htmlspecialchars($fb_url); ?>" target="_blank"><i class="bi bi-facebook"></i></a>
                     <a href="#"><i class="bi bi-twitter-x"></i></a>
                     <a href="#"><i class="bi bi-youtube"></i></a>
                 </div>
@@ -114,10 +138,10 @@
             <div class="col-lg-5 text-center text-lg-end">
                 <h4>Contact</h4>
                 <div class="small text-lg-end" style="color: #bbb;">
-                    <p class="mb-1">2nd Floor, Executive Bldg, WMSU Main Campus</p>
+                    <p class="mb-1"><?php echo nl2br(htmlspecialchars($address)); ?></p>
                     <div class="contact-compact justify-content-lg-end">
-                        <span><i class="bi bi-telephone"></i> +63 62 991 1771</span>
-                        <span><i class="bi bi-envelope"></i> facultyunion@wmsu.edu.ph</span>
+                        <span><i class="bi bi-telephone"></i> <?php echo htmlspecialchars($phone); ?></span>
+                        <span><i class="bi bi-envelope"></i> <a href="mailto:<?php echo htmlspecialchars($email); ?>"><?php echo htmlspecialchars($email); ?></a></span>
                     </div>
                 </div>
             </div>

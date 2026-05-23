@@ -9,6 +9,10 @@ $db = $database->getConnection();
 
 $success = "";
 $error = "";
+$settings = [
+    'site_name' => 'Faculty Union',
+    'logo_path' => '../images/facultyunion.png'
+];
 
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -29,14 +33,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (empty($error)) {
-        $stmt = $db->prepare("UPDATE site_settings SET site_name = ?, logo_path = ? WHERE id = 1");
-        $stmt->execute([$site_name, $logo_path]);
-        $success = "Site settings updated successfully!";
+        try {
+            if ($db instanceof PDO) {
+                $stmt = $db->prepare("UPDATE site_settings SET site_name = ?, logo_path = ? WHERE id = 1");
+                $stmt->execute([$site_name, $logo_path]);
+                $success = "Site settings updated successfully!";
+                $settings['site_name'] = $site_name;
+                $settings['logo_path'] = $logo_path;
+            } else {
+                $error = "Database connection unavailable.";
+            }
+        } catch (PDOException $exception) {
+            $error = "Unable to update site settings.";
+        }
     }
 }
 
 // Fetch current settings
-$settings = $db->query("SELECT * FROM site_settings WHERE id = 1")->fetch(PDO::FETCH_ASSOC);
+if ($db instanceof PDO) {
+    try {
+        $settings_query = $db->query("SELECT * FROM site_settings WHERE id = 1");
+        $fetched_settings = $settings_query ? $settings_query->fetch(PDO::FETCH_ASSOC) : false;
+
+        if (is_array($fetched_settings)) {
+            $settings = array_merge($settings, $fetched_settings);
+        }
+    } catch (PDOException $exception) {
+        $error = $error ?: "Site settings are not available yet.";
+    }
+}
 ?>
 
 <!DOCTYPE html>

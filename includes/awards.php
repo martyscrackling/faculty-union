@@ -2,10 +2,13 @@
 require_once('class/database.php');
 $database = new Database();
 $db = $database->getConnection();
+$awards = [];
 
 try {
-    $awards_query = $db->query("SELECT * FROM awards ORDER BY award_year DESC, created_at DESC");
-    $awards = $awards_query->fetchAll(PDO::FETCH_ASSOC);
+    if ($db instanceof PDO) {
+        $awards_query = $db->query("SELECT * FROM awards ORDER BY award_year DESC, created_at DESC");
+        $awards = $awards_query->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) { 
     $awards = []; 
 }

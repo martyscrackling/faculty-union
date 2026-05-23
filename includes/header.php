@@ -4,13 +4,22 @@ require_once('class/database.php'); // Ensure this path is correct relative to w
 $database = new Database();
 $db = $database->getConnection();
 
-// Fetch the title and logo path
-$settings_query = $db->query("SELECT site_name, logo_path FROM site_settings WHERE id = 1");
-$settings = $settings_query->fetch(PDO::FETCH_ASSOC);
+$display_name = "Faculty Union";
+$display_logo = "";
 
-// Fallback values if database is empty
-$display_name = !empty($settings['site_name']) ? htmlspecialchars($settings['site_name']) : "Faculty Union";
-$display_logo = !empty($settings['logo_path']) ? $settings['logo_path'] : "";
+if ($db instanceof PDO) {
+  try {
+    $settings_query = $db->query("SELECT site_name, logo_path FROM site_settings WHERE id = 1");
+    $settings = $settings_query ? $settings_query->fetch(PDO::FETCH_ASSOC) : false;
+
+    if (is_array($settings)) {
+      $display_name = !empty($settings['site_name']) ? htmlspecialchars($settings['site_name']) : $display_name;
+      $display_logo = !empty($settings['logo_path']) ? $settings['logo_path'] : $display_logo;
+    }
+  } catch (PDOException $exception) {
+    // Use the built-in defaults when site settings are unavailable.
+  }
+}
 ?>
 
 <header id="header" class="header d-flex align-items-center fixed-top" style="background-color: #ffffff; border-bottom: 1px solid #eee;">
@@ -105,7 +114,7 @@ $display_logo = !empty($settings['logo_path']) ? $settings['logo_path'] : "";
                     <a class="btn btn-logout nav-link" href="auth/logout.php">Logout</a>
                 </div>
             <?php else: ?>
-                <a class="btn btn-login nav-link" href="auth/login.php">Login</a>
+                <!-- <a class="btn btn-login nav-link" href="auth/login.php">Login</a> -->
             <?php endif; ?>
           </li>
         </ul>

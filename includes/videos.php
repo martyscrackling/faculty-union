@@ -2,10 +2,13 @@
 require_once('class/database.php');
 $database = new Database();
 $db = $database->getConnection();
+$videos = [];
 
 try {
-    $video_query = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC");
-    $videos = $video_query->fetchAll(PDO::FETCH_ASSOC);
+    if ($db instanceof PDO) {
+        $video_query = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC");
+        $videos = $video_query->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) { 
     $videos = []; 
 }

@@ -6,24 +6,27 @@ require_once 'class/database.php';
 $database = new Database();
 $db = $database->getConnection(); // Adjust this method name to match your class
 
+$content = [
+  'heading' => 'Upholding Faculty Rights and Academic Freedom',
+  'p1' => 'The WMSU Faculty Union is a united and independent organization dedicated to protecting the rights and welfare of academic personnel.',
+  'p2' => 'Our union serves as a strong collective voice and promotes equitable access to professional development opportunities.',
+  'p3' => 'We are committed to defending academic freedom and fostering solidarity.',
+  'image_path' => 'img/facultyu.webp'
+];
+
 try {
+  if ($db instanceof PDO) {
     // Fetch data from the database
     $stmt = $db->prepare("SELECT * FROM about_content WHERE section_name = 'about_union' LIMIT 1");
     $stmt->execute();
-    $content = $stmt->fetch(PDO::FETCH_ASSOC);
+    $dbContent = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Fallback if database is empty
-    if (!$content) {
-        $content = [
-            'heading' => 'Upholding Faculty Rights and Academic Freedom',
-            'p1' => 'The WMSU Faculty Union is a united and independent organization...',
-            'p2' => 'Our union serves as a strong collective voice...',
-            'p3' => 'We are committed to defending academic freedom...',
-            'image_path' => 'facultyu.webp' 
-        ];
+    if (is_array($dbContent)) {
+      $content = array_merge($content, $dbContent);
+    }
     }
 } catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+  // Keep defaults when DB lookup fails.
 }
 ?>
 

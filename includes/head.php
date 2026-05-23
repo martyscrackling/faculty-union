@@ -30,6 +30,7 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="cssfolder/index.css"> <!-- Path is relative, OK -->
   <link rel="stylesheet" href="cssfolder/custom.css"> <!-- Added Custom CSS -->
+  <link rel="icon" href="images/facultyunion.png">
 </head>
 
 

@@ -1,8 +1,16 @@
 <?php
+require_once('class/database.php');
+$database = new Database();
+$db = $database->getConnection();
+
 // Fetch Contact Data with a fallback to avoid disappearing sections
 try {
-    $contact_query = $db->query("SELECT * FROM contact_info WHERE id = 1");
-    $contact = $contact_query->fetch(PDO::FETCH_ASSOC);
+    if ($db instanceof PDO) {
+        $contact_query = $db->query("SELECT * FROM contact_info WHERE id = 1");
+        $contact = $contact_query->fetch(PDO::FETCH_ASSOC);
+    } else {
+        $contact = false;
+    }
 } catch (Exception $e) {
     $contact = false;
 }
