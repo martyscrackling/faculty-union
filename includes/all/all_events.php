@@ -340,18 +340,18 @@ $today = date('Y-m-d');
 		</button>
 	</div>
 
-	<nav class="nav flex-column">
-		<a href="all_events.php" class="nav-link<?php echo $currentPage === 'all_events.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-th-large"></i> Events
+	<nav class="nav flex-column" aria-label="Awards navigation">
+		<a href="all_events.php" class="nav-link<?php echo $currentPage === 'all_events.php' ? ' active' : ''; ?>" role="link">
+			<i class="fas fa-calendar-days" aria-hidden="true" title="Events"></i> Events
 		</a>
-		<a href="all_awards.php" class="nav-link<?php echo $currentPage === 'all_awards.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-calendar-check"></i> Awards
+		<a href="all_awards.php" class="nav-link<?php echo $currentPage === 'all_awards.php' ? ' active' : ''; ?>" role="link">
+			<i class="fas fa-trophy" aria-hidden="true" title="Awards"></i> Awards
 		</a>
-		<a href="all_videos.php" class="nav-link<?php echo $currentPage === 'all_videos.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-history"></i> Videos
+		<a href="all_videos.php" class="nav-link<?php echo $currentPage === 'all_videos.php' ? ' active' : ''; ?>" role="link">
+			<i class="fas fa-video" aria-hidden="true" title="Videos"></i> Videos
 		</a>
-		<a href="../../gallery.php" class="nav-link<?php echo $currentPage === 'gallery.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-image"></i> Gallery
+		<a href="../../gallery.php" class="nav-link<?php echo $currentPage === 'gallery.php' ? ' active' : ''; ?>" role="link">
+			<i class="fas fa-images" aria-hidden="true" title="Gallery"></i> Gallery
 		</a>
 	</nav>
 </div>

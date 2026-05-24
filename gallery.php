@@ -175,16 +175,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     
     <nav class="nav flex-column">
         <a href="includes/all/all_events.php" class="nav-link<?php echo $currentPage === 'all_events.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-th-large"></i> Events
+			<i class="fas fa-calendar-days"></i> Events
 		</a>
         <a href="includes/all/all_awards.php" class="nav-link<?php echo $currentPage === 'all_awards.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-calendar-check"></i> Awards
+			<i class="fas fa-trophy"></i> Awards
 		</a>
         <a href="includes/all/all_videos.php" class="nav-link<?php echo $currentPage === 'all_videos.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-history"></i> Videos
+			<i class="fas fa-video"></i> Videos
 		</a>
         <a href="gallery.php" class="nav-link<?php echo $currentPage === 'gallery.php' ? ' active' : ''; ?>" onclick="">
-			<i class="fas fa-image"></i> Gallery
+			<i class="fas fa-images"></i> Gallery
 		</a>
 	</nav>
 </div>
