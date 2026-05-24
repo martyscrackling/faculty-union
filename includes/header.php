@@ -100,11 +100,10 @@ if ($db instanceof PDO) {
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
           <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
-          <li class="nav-item"><a class="nav-link" href="#awards">Awards</a></li>
-          <li class="nav-item"><a class="nav-link" href="#videos">Videos</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="bout.php">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="includes/all/all_events.php">Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="includes/all/all_awards.php">Awards</a></li>
+          <li class="nav-item"><a class="nav-link" href="includes/all/all_videos.php">Videos</a></li>
           <li class="nav-item"><a class="nav-link" href="gallery.php">Gallery</a></li>
           
           <li class="nav-item">

@@ -16,6 +16,7 @@ $gallery_items = array_merge($awards, $videos, $events);
 usort($gallery_items, function($a, $b) {
     return strtotime($b['created_at']) - strtotime($a['created_at']);
 });
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -26,39 +27,79 @@ usort($gallery_items, function($a, $b) {
     <title>Gallery - Faculty Union</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="images/facultyunion.png">
+
     <style>
-        :root { --maroon: #8c1d1d; }
-        body { background-color: #f8f9fa; overflow-x: hidden; }
-        
-        /* Sidebar Responsive Design */
-        .sidebar { 
-            height: 100vh; 
-            background: white; 
-            border-right: 1px solid #dee2e6; 
-            position: fixed; 
-            padding-top: 20px; 
-            z-index: 1050; 
-            transition: all 0.3s;
-            width: 250px;
+        :root {
+            --maroon: #8c1d1d;
+            --maroon-dark: #671414;
+            --gold: #d4af37;
+            --bg: #f5f2ed;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #e5ddd7;
         }
 
-        .nav-link { color: #495057; font-weight: 500; padding: 12px 20px; transition: 0.3s; cursor: pointer; border-radius: 0 25px 25px 0; margin-right: 10px; }
-        .nav-link:hover, .nav-link.active { background: var(--maroon); color: white !important; }
+        * { box-sizing: border-box; }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(140, 29, 29, 0.08), transparent 32%),
+                linear-gradient(180deg, #fbf8f4 0%, #f3ede6 100%);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid var(--line);
+            position: fixed;
+            padding-top: 20px;
+            z-index: 1050;
+            transition: all 0.3s ease;
+            width: 250px;
+            left: 0;
+            top: 0;
+        }
+
+        .nav-link {
+            color: #4b5563;
+            font-weight: 600;
+            padding: 12px 20px;
+            transition: 0.25s ease;
+            cursor: pointer;
+            border-radius: 0 999px 999px 0;
+            margin-right: 10px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+            color: #fff !important;
+            transform: translateX(3px);
+        }
+
         .nav-link i { margin-right: 10px; width: 20px; text-align: center; }
 
-        /* Main Content Adjustment */
-        .gallery-content { margin-left: 250px; transition: all 0.3s; width: calc(100% - 250px); }
-
-        .gallery-header { 
-            background: white; 
-            padding: 15px 20px; 
-            border-bottom: 1px solid #dee2e6; 
-            position: sticky; 
-            top: 0; 
-            z-index: 999; 
+        .gallery-content {
+            margin-left: 250px;
+            transition: all 0.3s;
+            width: calc(100% - 250px);
+            min-height: 100vh;
         }
 
-        .search-container { max-width: 100%; width: 300px; }
+        .gallery-header {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .search-container { max-width: 100%; width: 300px; position: relative; }
         .search-container .form-control { border-radius: 20px; padding-left: 40px; }
         .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #adb5bd; }
 
@@ -83,60 +124,75 @@ usort($gallery_items, function($a, $b) {
         .detail-info { font-size: 0.85rem; margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 5px; }
         .detail-info i { color: var(--maroon); width: 18px; margin-right: 8px; }
 
-        /* Responsive Mobile Tweak */
         @media (max-width: 991.98px) {
-            .sidebar { width: 0; transform: translateX(-100%); visibility: hidden; }
-            .sidebar.active { width: 250px; transform: translateX(0); visibility: visible; }
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+                visibility: hidden;
+            }
+
+            .sidebar.active {
+                width: 250px;
+                transform: translateX(0);
+                visibility: visible;
+            }
+
             .gallery-content { margin-left: 0; width: 100%; }
-            .mobile-toggle { display: block !important; }
+            .mobile-toggle {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
         }
 
-        .mobile-toggle { display: none; background: var(--maroon); color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-right: 15px; }
+        .mobile-toggle {
+            display: none;
+            background: var(--maroon);
+            color: #fff;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+
+        .modal-content {
+            border-radius: 24px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <div class="text-center mb-4 px-3 d-flex justify-content-between align-items-center">
-        <div>
-            <h5 class="fw-bold mb-0" style="color: var(--maroon);">Faculty Union</h5>
+    <div class="text-center mb-4 px-3 d-flex justify-content-between align-items-start">
+        <div class="w-100">
+            <img src="images/facultyunion.png" alt="Logo" style="max-height: 80px;">
+            <h5 class="fw-bold mb-0 mt-3" style="color: var(--maroon);">Faculty Union</h5>
             <small class="text-muted">Media Center</small>
         </div>
-        <button class="btn d-lg-none" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        <button class="btn d-lg-none" type="button" onclick="toggleSidebar()" aria-label="Close menu"><i class="fas fa-times"></i></button>
     </div>
     
     <nav class="nav flex-column">
-        <a class="nav-link active" onclick="setCategory('all', this)">
-            <i class="fas fa-th-large"></i> All Media
-        </a>
-        <a class="nav-link" onclick="setCategory('image_only', this)">
-            <i class="fas fa-images"></i>Images
-        </a>
-        <a class="nav-link" onclick="setCategory('video', this)">
-            <i class="fas fa-video"></i> Videos
-        </a>
-        <a class="nav-link" onclick="setCategory('award', this)">
-            <i class="fas fa-award"></i> Awards
-        </a>
-        <hr class="mx-3">
-        <small class="px-4 text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">Event Filtering</small>
-        <a class="nav-link" onclick="setCategory('upcoming', this)">
-            <i class="fas fa-calendar-check text-success"></i> Upcoming
-        </a>
-        <a class="nav-link" onclick="setCategory('past', this)">
-            <i class="fas fa-history text-secondary"></i> Past Events
-        </a>
-        <hr class="mx-3">
-        <a class="nav-link text-muted" href="index.php">
-            <i class="fas fa-arrow-left"></i> Home
-        </a>
-    </nav>
+        <a href="includes/all/all_events.php" class="nav-link<?php echo $currentPage === 'all_events.php' ? ' active' : ''; ?>" onclick="">
+			<i class="fas fa-th-large"></i> Events
+		</a>
+        <a href="includes/all/all_awards.php" class="nav-link<?php echo $currentPage === 'all_awards.php' ? ' active' : ''; ?>" onclick="">
+			<i class="fas fa-calendar-check"></i> Awards
+		</a>
+        <a href="includes/all/all_videos.php" class="nav-link<?php echo $currentPage === 'all_videos.php' ? ' active' : ''; ?>" onclick="">
+			<i class="fas fa-history"></i> Videos
+		</a>
+        <a href="gallery.php" class="nav-link<?php echo $currentPage === 'gallery.php' ? ' active' : ''; ?>" onclick="">
+			<i class="fas fa-image"></i> Gallery
+		</a>
+	</nav>
 </div>
 
-<div class="gallery-content">
-    <div class="gallery-header d-flex align-items-center justify-content-between">
+<div class="gallery-content content-wrap">
+    <div class="gallery-header d-flex align-items-center justify-content-between px-3 px-md-4 py-3">
         <div class="d-flex align-items-center">
-            <button class="mobile-toggle" onclick="toggleSidebar()">
+            <button class="mobile-toggle" type="button" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
             <h4 class="mb-0 fw-bold d-none d-sm-block">Gallery</h4>
@@ -148,6 +204,11 @@ usort($gallery_items, function($a, $b) {
     </div>
 
     <div class="gallery-body">
+        <div class="d-flex justify-content-start mb-3">
+            <button class="btn" id="backButton" onclick="window.location.href='index.php';" aria-label="Go back">
+                <i class="fas fa-arrow-left me-2"></i>Back
+        </button>
+        </div>
         <div class="row g-3 g-md-4" id="gallery-grid">
             <?php 
             $today = date('Y-m-d');
@@ -211,7 +272,7 @@ function toggleSidebar() {
 }
 
 function setCategory(category, element) {
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.filter-chip').forEach(link => link.classList.remove('active'));
     element.classList.add('active');
     currentCategory = category;
     if(window.innerWidth < 992) toggleSidebar(); 
