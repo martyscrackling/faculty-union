@@ -375,7 +375,7 @@ $today = date('Y-m-d');
                 <i class="fas fa-arrow-left me-2"></i>Back
         </button>
 			
-		<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end mb-5 mt-2">
+		<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end mb-3 mt-2">
 			<button class="filter-chip active" type="button" onclick="setCategory('all', this)">All</button>
 			<button class="filter-chip" type="button" onclick="setCategory('upcoming', this)">Upcoming</button>
 			<button class="filter-chip" type="button" onclick="setCategory('past', this)">Past</button>

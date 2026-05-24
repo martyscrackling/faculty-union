@@ -29,6 +29,17 @@ try {
 } catch (PDOException $e) {
 	$awards = [];
 }
+
+$awardYears = [];
+foreach ($awards as $award) {
+	$year = trim((string) ($award['award_year'] ?? ''));
+	if ($year !== '') {
+		$awardYears[$year] = true;
+	}
+}
+
+$awardYears = array_keys($awardYears);
+rsort($awardYears, SORT_NATURAL);
 ?>
 
 <!DOCTYPE html>
@@ -142,6 +153,14 @@ try {
 			background: var(--maroon);
 			color: #fff;
 			border-color: var(--maroon);
+		}
+
+		.year-filter {
+			max-width: 220px;
+			border-radius: 999px;
+			padding: 10px 16px;
+			border: 1px solid var(--line);
+			box-shadow: none;
 		}
 
 		.gallery-body {
@@ -364,6 +383,15 @@ try {
                 <i class="fas fa-arrow-left me-2"></i>Back
         </button>
         </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end mb-3 mt-2">
+			<label class="visually-hidden" for="awardYearFilter">Filter awards by year</label>
+			<select id="awardYearFilter" class="form-select form-select-sm year-filter" onchange="applyFilters()">
+				<option value="all">All years</option>
+				<?php foreach ($awardYears as $year): ?>
+					<option value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
 		<div class="row g-3 g-md-4" id="awards-grid">
 			<?php if (!empty($awards)): ?>
 				<?php foreach ($awards as $award): ?>
@@ -418,6 +446,13 @@ try {
 					</div>
 				</div>
 			<?php endif; ?>
+			<div class="col-12 d-none" id="awardsEmptyState">
+				<div class="empty-state">
+					<i class="fas fa-award fa-2x mb-3" style="color: var(--maroon);"></i>
+					<h5 class="fw-bold mb-2" id="awardsEmptyTitle">No Awards for this year</h5>
+					<p class="mb-0" id="awardsEmptyMessage">There are no awards recorded for the selected year.</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -455,7 +490,12 @@ function setCategory(category, element) {
 
 function applyFilters() {
 	const searchTerm = document.getElementById('awardSearch').value.toLowerCase();
+	const selectedYear = document.getElementById('awardYearFilter').value;
 	const cards = document.querySelectorAll('.award-card-wrap');
+	const emptyState = document.getElementById('awardsEmptyState');
+	const emptyTitle = document.getElementById('awardsEmptyTitle');
+	const emptyMessage = document.getElementById('awardsEmptyMessage');
+	let visibleCount = 0;
 
 	cards.forEach(card => {
 		const title = card.getAttribute('data-title') || '';
@@ -463,6 +503,7 @@ function applyFilters() {
 		const year = card.getAttribute('data-year') || '';
 		const awardStatus = card.getAttribute('data-award-status');
 		const matchesSearch = title.includes(searchTerm) || recipient.includes(searchTerm) || year.includes(searchTerm);
+		const matchesYear = selectedYear === 'all' || year === selectedYear;
 
 		let matchesCategory = currentCategory === 'all';
 
@@ -470,8 +511,30 @@ function applyFilters() {
 			matchesCategory = awardStatus === currentCategory;
 		}
 
-		card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
+		if (matchesSearch && matchesCategory && matchesYear) {
+			card.style.display = '';
+			visibleCount += 1;
+		} else {
+			card.style.display = 'none';
+		}
 	});
+
+	if (emptyState) {
+		if (visibleCount === 0) {
+			emptyState.classList.remove('d-none');
+			if (emptyTitle && emptyMessage) {
+				if (selectedYear !== 'all') {
+					emptyTitle.textContent = 'No Awards for this year';
+					emptyMessage.textContent = 'There are no awards recorded for the selected year.';
+				} else {
+					emptyTitle.textContent = 'No awards found';
+					emptyMessage.textContent = 'There are no awards matching your current search.';
+				}
+			}
+		} else {
+			emptyState.classList.add('d-none');
+		}
+	}
 }
 
 function viewAwardDetails(awardData) {
