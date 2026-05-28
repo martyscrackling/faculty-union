@@ -100,6 +100,13 @@ $fb_name = $contact['facebook_name'] ?? 'WMSU Faculty Union';
     @media (max-width: 768px) {
         .contact-compact { flex-direction: column; gap: 5px; align-items: center; }
     }
+    .title{
+        margin-top: 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 5px;
+    }
 </style>
 
 <footer id="footer" class="footer">
@@ -111,6 +118,7 @@ $fb_name = $contact['facebook_name'] ?? 'WMSU Faculty Union';
                     <img src="images/facultyunion.png" alt="Logo" style="max-height: 60px;">
                     <img src="images/wmsu.png" alt="Logo" style="max-height: 60px;">
                 </a>
+                <h1 class="title">WMSU Faculty Union</h1>
                 <p class="small mb-2" style="line-height: 1.4;">Upholding Faculty Rights and Academic Freedom.</p>
                     <div class="social-links d-flex justify-content-center justify-content-lg-start">
                     <a href="<?php echo htmlspecialchars($fb_url); ?>" target="_blank"><i class="bi bi-facebook"></i></a>

@@ -1,7 +1,10 @@
 <?php
 require_once('../class/database.php');
+require_once('sidebar.php');
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Videos";
+require_once('navbar.php');
 
 // --- HANDLE DELETE ---
 if (isset($_GET['delete'])) {
@@ -108,20 +111,49 @@ $videos = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC")->fet
         :root { --maroon: #8c1d1d; }
         .btn-maroon { background: var(--maroon); color: white; }
         .btn-maroon:hover { background: #6b1616; color: white; }
-        .video-preview { width: 120px; height: 70px; object-fit: cover; border-radius: 5px; background: #000; }
+        .video-preview { width: 160px; height: 90px; object-fit: cover; border-radius: 6px; background: #000; overflow: hidden; }
         .back-link { text-decoration: none; color: #666; font-weight: 500; transition: 0.3s; }
         .back-link:hover { color: var(--maroon); }
         .hidden-field { display: none; }
+
+        .content {
+            /* Match sidebar width and padding for consistent layout */
+            margin-left: 260px;
+            padding: 40px;
+            max-width: calc(100% - 260px);
+        }
+
+        @media (max-width: 991.98px) {
+            .content {
+                margin-left: 0;
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
 
-<div class="container mt-4 pb-5">
-    <div class="mb-4">
-        <a href="dashboard.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
+    <link rel="icon" href="../images/facultyunion.png">
+<div class="container content mt-4 pb-5">
+    <?php if (isset($_GET['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Video added successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['updated'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Video updated.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['deleted'])): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        Video deleted.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php endif; ?>
 
     <div class="card shadow mb-5">
         <div class="card-header btn-maroon text-white">
@@ -157,6 +189,10 @@ $videos = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC")->fet
     </div>
 
     <div class="card shadow">
+        <div class="p-3 d-flex justify-content-between align-items-center">
+            <div class="fw-semibold">All Videos</div>
+            <input id="videoSearch" type="search" class="form-control form-control-sm" placeholder="Search title..." style="width:220px;">
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -171,9 +207,15 @@ $videos = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC")->fet
                     <?php foreach ($videos as $row): ?>
                     <tr>
                         <td>
-                            <div class="video-preview d-flex align-items-center justify-content-center text-white">
-                                <i class="fas <?php echo $row['video_type'] == 'youtube' ? 'fa-play-circle text-danger' : 'fa-file-video text-primary'; ?> fa-2x"></i>
-                            </div>
+                            <?php if ($row['video_type'] == 'youtube'): ?>
+                                <div class="video-preview">
+                                    <iframe src="<?php echo htmlspecialchars($row['video_source']); ?>" frameborder="0" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
+                                </div>
+                            <?php else: ?>
+                                <div class="video-preview">
+                                    <video src="<?php echo '../' . htmlspecialchars($row['video_source']); ?>" controls muted preload="metadata" style="width:100%;height:100%;object-fit:cover;"></video>
+                                </div>
+                            <?php endif; ?>
                         </td>
                         <td><strong><?php echo htmlspecialchars($row['video_title']); ?></strong></td>
                         <td><span class="badge <?php echo $row['video_type'] == 'youtube' ? 'bg-danger' : 'bg-primary'; ?>"><?php echo strtoupper($row['video_type']); ?></span></td>
@@ -216,14 +258,20 @@ $videos = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC")->fet
                                 <option value="raw">Raw Video Upload</option>
                             </select>
                         </div>
-                        <div class="col-12" id="edit_yt">
+                        <div class="col-12 hidden-field" id="edit_yt">
                             <label class="form-label">YouTube URL (Leave blank to keep current)</label>
                             <input type="url" name="youtube_url" id="edit_url_val" class="form-control">
                         </div>
-                        <div class="col-12" id="edit_raw">
+                        <div class="col-12 hidden-field" id="edit_raw">
                             <label class="form-label">Replace Video File (Optional)</label>
                             <input type="file" name="video_file" class="form-control" accept="video/*">
                         </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div id="edit_preview" style="width:100%;height:320px;background:#000;border-radius:6px;overflow:hidden;"></div>
+                        </div>
+                    </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -240,6 +288,7 @@ $videos = $db->query("SELECT * FROM admin_videos ORDER BY created_at DESC")->fet
 function toggleInputs(selectObj, ytId, rawId) {
     const yt = document.getElementById(ytId);
     const raw = document.getElementById(rawId);
+    if (!selectObj) return;
     if (selectObj.value === 'youtube') {
         yt.style.display = 'block';
         raw.style.display = 'none';
@@ -249,21 +298,53 @@ function toggleInputs(selectObj, ytId, rawId) {
     }
 }
 
+function updateEditPreview() {
+    const preview = document.getElementById('edit_preview');
+    if (!preview) return;
+    const type = document.getElementById('edit_type').value;
+    const existing = document.getElementById('edit_existing_source').value || '';
+    const ytInput = document.getElementById('edit_url_val').value || '';
+    preview.innerHTML = '';
+    if (type === 'youtube') {
+        const src = ytInput || existing;
+        preview.innerHTML = '<iframe src="' + src + '" frameborder="0" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>';
+    } else {
+        const src = existing;
+        preview.innerHTML = '<video src="../' + src + '" controls style="width:100%;height:100%;object-fit:cover;"></video>';
+    }
+}
+
 function openEditModal(data) {
     document.getElementById('edit_id').value = data.id;
     document.getElementById('edit_title').value = data.video_title;
     document.getElementById('edit_type').value = data.video_type;
     document.getElementById('edit_existing_source').value = data.video_source;
-    
     const ytVal = document.getElementById('edit_url_val');
-    if(data.video_type === 'youtube') {
+    if (data.video_type === 'youtube') {
         ytVal.value = data.video_source;
     } else {
         ytVal.value = '';
     }
-
     toggleInputs(document.getElementById('edit_type'), 'edit_yt', 'edit_raw');
+    updateEditPreview();
+    // attach listeners (ensure duplicates don't pile up)
+    const typeEl = document.getElementById('edit_type');
+    const urlEl = document.getElementById('edit_url_val');
+    typeEl.onchange = function() { toggleInputs(this, 'edit_yt', 'edit_raw'); updateEditPreview(); };
+    urlEl.oninput = updateEditPreview;
     new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+// table search
+const searchInput = document.getElementById('videoSearch');
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const q = this.value.trim().toLowerCase();
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            const title = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+            row.style.display = title.includes(q) ? '' : 'none';
+        });
+    });
 }
 </script>
 

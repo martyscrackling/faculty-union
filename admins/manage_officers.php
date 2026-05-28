@@ -2,8 +2,11 @@
 session_start();
 if (!isset($_SESSION['user_id'])) { header("Location: auth/login.php"); exit(); }
 require_once('../class/database.php');
+require_once('sidebar.php');
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Officers";
+require_once('navbar.php');
 
 $msg = "";
 
@@ -134,67 +137,77 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
 <head>
     <meta charset="UTF-8">
     <title>Manage Officers - Admin</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/main.css">
     <style>
-        .table thead { background: #8c1d1d; color: white; }
-        .btn-maroon { background: #8c1d1d; color: white; border: none; }
-        .btn-maroon:hover { background: #d4af37; color: black; }
+        .btn-maroon{background:#800000;color:#fff;border:none}
+        .btn-maroon:hover{background:#5c0000;color:#fff}
+        .table img{width:56px;height:56px;object-fit:cover}
+        .modal-body .form-control-file{padding:.25rem 0}
+        .profile-preview{width:72px;height:72px;object-fit:cover}
     </style>
 </head>
 <body class="bg-light">
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between mb-4">
-        <h3><a href="dashboard.php" class="text-dark text-decoration-none mr-3">&larr;</a> Manage Union Officers</h3>
-        <button class="btn btn-maroon" data-toggle="modal" data-target="#addModal">Add New Officer</button>
-    </div>
+    <link rel="icon" href="../images/facultyunion.png">
 
-    <?php if(isset($_GET['msg'])): ?>
-        <div class="alert alert-success"><?php echo $_GET['msg']; ?> successful!</div>
-    <?php endif; ?>
 
-    <div class="card shadow-sm">
-        <table class="table mb-0 align-middle">
-            <thead>
-                <tr>
-                    <th>Photo</th>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Position</th>
-                    <th>Dept</th>
-                    <th>Category</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($officers as $o): ?>
-                <tr>
-                    <td style="width: 84px;">
-                        <?php $photoSrc = !empty($o['profile_picture']) ? '../' . $o['profile_picture'] : '../images/facultyunion.png'; ?>
-                        <img src="<?php echo htmlspecialchars($photoSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($o['full_name'], ENT_QUOTES, 'UTF-8'); ?>" class="rounded-circle border" style="width:56px;height:56px;object-fit:cover;">
-                    </td>
-                    <td><?php echo $o['rank']; ?></td>
-                    <td><?php echo htmlspecialchars($o['full_name']); ?></td>
-                    <td><?php echo htmlspecialchars($o['position']); ?></td>
-                    <td><?php echo $o['department_acronym']; ?></td>
-                    <td><span class="badge badge-secondary"><?php echo $o['category']; ?></span></td>
-                    <td>
-                        <button class="btn btn-sm btn-info edit-btn" 
-                                data-id="<?php echo $o['id']; ?>"
-                                data-name="<?php echo htmlspecialchars($o['full_name']); ?>"
-                                data-pos="<?php echo htmlspecialchars($o['position']); ?>"
-                                data-dept="<?php echo htmlspecialchars($o['department_acronym']); ?>"
-                                data-cat="<?php echo $o['category']; ?>"
-                                data-rank="<?php echo $o['rank']; ?>"
-                                data-photo="<?php echo htmlspecialchars($o['profile_picture'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                                data-toggle="modal" data-target="#editModal">Edit</button>
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between mb-4 align-items-center">
+            <button class="btn btn-maroon" data-toggle="modal" data-target="#addModal">Add New Officer</button>
+        </div>
 
-                        <a href="?delete=<?php echo $o['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this officer?')">Delete</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <?php if(isset($_GET['msg'])): ?>
+            <div class="alert alert-success"><?php echo htmlspecialchars($_GET['msg'], ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle text-center">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Dept</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($officers as $o): ?>
+                    <tr>
+                        <td style="width: 84px;">
+                            <?php $photoSrc = !empty($o['profile_picture']) ? '../' . $o['profile_picture'] : '../images/facultyunion.png'; ?>
+                            <img src="<?php echo htmlspecialchars($photoSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($o['full_name'], ENT_QUOTES, 'UTF-8'); ?>" class="rounded-circle border" style="width:56px;height:56px;object-fit:cover;">
+                        </td>
+                        <td><?php echo htmlspecialchars($o['rank'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($o['full_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($o['position'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($o['department_acronym'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><span class="badge badge-secondary"><?php echo htmlspecialchars($o['category'], ENT_QUOTES, 'UTF-8'); ?></span></td>
+                        <td class="text-nowrap">
+                                <button class="btn btn-sm btn-info edit-btn" 
+                                    data-id="<?php echo $o['id']; ?>"
+                                    data-name="<?php echo htmlspecialchars($o['full_name']); ?>"
+                                    data-pos="<?php echo htmlspecialchars($o['position']); ?>"
+                                    data-dept="<?php echo htmlspecialchars($o['department_acronym']); ?>"
+                                    data-cat="<?php echo $o['category']; ?>"
+                                    data-rank="<?php echo $o['rank']; ?>"
+                                    data-photo="<?php echo htmlspecialchars($o['profile_picture'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                    data-toggle="modal" data-target="#editModal">Edit</button>
+
+                            <a href="?delete=<?php echo $o['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this officer?')">Delete</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -277,6 +290,14 @@ $('.edit-btn').on('click', function() {
     const photo = $(this).data('photo');
     $('#edit_photo_preview').attr('src', photo ? '../' + photo : '../images/facultyunion.png');
 });
+    // Preview selected image in edit modal
+    $('#editModal input[name="profile_picture"]').on('change', function(e){
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev){ $('#edit_photo_preview').attr('src', ev.target.result); };
+        reader.readAsDataURL(file);
+    });
 </script>
 
 </body>

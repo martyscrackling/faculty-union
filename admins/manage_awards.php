@@ -1,15 +1,18 @@
 <?php
 // Corrected path to step out of 'admins' folder to find 'class'
 require_once('../class/database.php');
+require_once('sidebar.php');
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Awards";
+require_once('navbar.php');
 
 // --- HANDLE DELETE ---
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
     $stmt = $db->prepare("DELETE FROM awards WHERE id = ?");
     $stmt->execute([$id]);
-    header("Location: manage_awards.php");
+    header("Location: manage_awards.php?deleted=1");
     exit();
 }
 
@@ -62,6 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_award'])) {
 }
 
 $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Flash message handling
+$message = '';
+$message_type = 'info';
+if (isset($_GET['success'])) { $message = 'Award published.'; $message_type = 'success'; }
+if (isset($_GET['updated'])) { $message = 'Award updated.'; $message_type = 'success'; }
+if (isset($_GET['deleted'])) { $message = 'Award deleted.'; $message_type = 'warning'; }
 ?>
 
 <!DOCTYPE html>
@@ -69,6 +79,7 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
 <head>
     <meta charset="UTF-8">
     <title>Manage Awards - Faculty Union</title>
+    <link rel="icon" href="../images/facultyunion.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -78,16 +89,43 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
         .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
         .back-link { text-decoration: none; color: #666; font-weight: 500; transition: 0.3s; }
         .back-link:hover { color: var(--maroon); }
+
+        .content {
+            /* Match the sidebar width so the sidebar is visible */
+            margin-left: 260px; /* should match .sidebar width in sidebar.php */
+            padding: 40px; /* match .main-content padding from sidebar.php */
+            max-width: calc(100% - 260px);
+        }
+
+        /* Collapse sidebar layout at the same breakpoint used in sidebar.php */
+        @media (max-width: 991.98px) {
+            .content {
+                margin-left: 0;
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
+
+        /* UI tweaks */
+        .card-header.btn-maroon { color: #fff; }
+        .table td { vertical-align: middle; }
+        .award-desc { max-width: 420px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .img-large { width: 100px; height: 80px; object-fit: cover; border-radius: 6px; }
+        .file-preview { display:inline-block; width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #e0e0e0; }
+        .btn-sm .bi { margin-right:6px; }
     </style>
 </head>
 <body class="bg-light">
 
-<div class="container mt-4 pb-5">
-    <div class="mb-4">
-        <a href="dashboard.php" class="back-link">
-            <i class="bi bi-arrow-left-circle-fill"></i> Back to Dashboard
-        </a>
-    </div>
+<div class="container content mt-2 pb-5">
+
+    <?php if(!empty($message)): ?>
+        <div class="alert alert-<?php echo htmlspecialchars($message_type); ?> alert-dismissible fade show" role="alert">
+            <?php echo htmlspecialchars($message); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
 
     <div class="card shadow mb-5">
         <div class="card-header btn-maroon">
@@ -109,7 +147,10 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
                 </div>
                 <div class="col-md-8">
                     <label class="form-label">Award Image</label>
-                    <input type="file" name="award_image" class="form-control" accept="image/*" required>
+                    <input type="file" id="add_award_image" name="award_image" class="form-control" accept="image/*" required>
+                    <div class="mt-2">
+                        <img id="add_preview" src="#" alt="Preview" class="file-preview d-none">
+                    </div>
                 </div>
                 <div class="col-12">
                     <label class="form-label">Description / Citation</label>
@@ -128,7 +169,7 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
             <span class="badge bg-secondary"><?php echo count($awards); ?> Total</span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Image</th>
@@ -147,7 +188,7 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
                         </td>
                         <td><span class="badge bg-light text-dark border"><?php echo $row['award_year']; ?></span></td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-primary" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </button>
                             <a href="?delete=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this record?')">
@@ -189,7 +230,11 @@ $awards = $db->query("SELECT * FROM awards ORDER BY created_at DESC")->fetchAll(
                         </div>
                         <div class="col-md-8">
                             <label class="form-label">Update Image (Leave blank to keep current)</label>
-                            <input type="file" name="award_image" class="form-control" accept="image/*">
+                            <input type="file" id="edit_award_image" name="award_image" class="form-control" accept="image/*">
+                            <div class="mt-2 d-flex align-items-center gap-3">
+                                <img id="current_image" src="#" alt="Current" class="img-large d-none">
+                                <span class="text-muted small">Leave blank to keep current image</span>
+                            </div>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Description / Citation</label>
@@ -214,10 +259,43 @@ function openEditModal(award) {
     document.getElementById('edit_recipient').value = award.recipient_name;
     document.getElementById('edit_year').value = award.award_year;
     document.getElementById('edit_description').value = award.description;
-    
+
+    // current image
+    var curImg = document.getElementById('current_image');
+    if (award.award_image) {
+        curImg.src = '../' + award.award_image;
+        curImg.classList.remove('d-none');
+    } else {
+        curImg.classList.add('d-none');
+    }
+
+    // clear edit file input preview
+    var editFile = document.getElementById('edit_award_image');
+    if (editFile) editFile.value = '';
+
     var editModal = new bootstrap.Modal(document.getElementById('editAwardModal'));
     editModal.show();
 }
+
+function previewFile(inputEl, previewId) {
+    var file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById(previewId);
+        img.src = e.target.result;
+        img.classList.remove('d-none');
+    }
+    reader.readAsDataURL(file);
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+    var addInput = document.getElementById('add_award_image');
+    if (addInput) addInput.addEventListener('change', function(){ previewFile(this, 'add_preview'); });
+
+    var editInput = document.getElementById('edit_award_image');
+    if (editInput) editInput.addEventListener('change', function(){ previewFile(this, 'current_image'); });
+});
 </script>
 
 </body>

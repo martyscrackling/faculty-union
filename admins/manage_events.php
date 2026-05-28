@@ -2,8 +2,11 @@
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { header("Location: ../auth/login.php"); exit(); }
 require_once('../class/database.php');
+require_once('sidebar.php');    
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Events";
+require_once('navbar.php');
 
 // Handle Delete
 if (isset($_GET['delete'])) {
@@ -63,34 +66,44 @@ $events = $db->query("SELECT * FROM events ORDER BY event_start_date DESC")->fet
     <style>
         :root { --maroon: #8c1d1d; --gold: #d4af37; }
         body { background: #f4f7f6; }
-        .btn-maroon { background: var(--maroon); color: white; }
+        .btn-maroon { background: var(--maroon); color: white; border: none; }
         .table thead { background: var(--maroon); color: white; }
+        .content{ margin-left: 300px; }
+        .table img.thumb{ height:48px; width:72px; object-fit:cover; border-radius:4px; }
+        .card.shadow-sm{ border-radius:8px; }
+        .modal-header h5{ margin:0; }
+        .small-muted{ color:#6c757d; font-size:0.9rem; }
     </style>
 </head>
 <body>
-<div class="container mt-5">
+<div class="container content mt-5">
+    <link rel="icon" href="../images/facultyunion.png">
     <div class="d-flex justify-content-between mb-4">
-        <h3><a href="dashboard.php" class="text-dark mr-2"><i class="fas fa-arrow-left"></i></a> Manage Events</h3>
-        <button class="btn btn-maroon" data-toggle="modal" data-target="#eventModal" onclick="clearForm()">+ Post New Event</button>
+        <div>
+            <button class="btn btn-maroon" data-toggle="modal" data-target="#eventModal" onclick="clearForm()"><i class="fas fa-plus mr-1"></i> Post Event</button>
+        </div>
+        <div class="small-muted">Total events: <?php echo count($events); ?></div>
     </div>
 
     <div class="card shadow-sm">
-        <table class="table mb-0">
+        <table class="table table-hover mb-0">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Event Title</th>
                     <th>Event Date</th>
                     <th>Location</th>
-                    <th>Actions</th>
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach($events as $e): ?>
                 <tr>
-                    <td><strong><?php echo htmlspecialchars($e['title']); ?></strong></td>
+                    <td><img class="thumb" src="../<?php echo htmlspecialchars($e['banner_path'] ?: 'img/event-default.jpg'); ?>" alt="banner"></td>
+                    <td><strong><?php echo htmlspecialchars($e['title']); ?></strong><div class="small-muted"><?php echo htmlspecialchars($e['subtitle']); ?></div></td>
                     <td><?php echo date("M d, Y", strtotime($e['event_start_date'])); ?></td>
                     <td><?php echo htmlspecialchars($e['location']); ?></td>
-                    <td>
+                    <td class="text-right">
                         <button class="btn btn-sm btn-info edit-btn" 
                             data-id="<?php echo $e['id']; ?>"
                             data-title="<?php echo htmlspecialchars($e['title']); ?>"
@@ -101,9 +114,9 @@ $events = $db->query("SELECT * FROM events ORDER BY event_start_date DESC")->fet
                             data-time="<?php echo htmlspecialchars($e['event_time']); ?>"
                             data-adm="<?php echo htmlspecialchars($e['admission']); ?>"
                             data-high="<?php echo htmlspecialchars($e['highlights']); ?>"
-                            data-banner="<?php echo $e['banner_path']; ?>"
-                            data-toggle="modal" data-target="#eventModal">Edit</button>
-                        <a href="?delete=<?php echo $e['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this event?')">Delete</a>
+                            data-banner="<?php echo htmlspecialchars($e['banner_path']); ?>"
+                            data-toggle="modal" data-target="#eventModal"><i class="fas fa-edit"></i></button>
+                        <a href="?delete=<?php echo $e['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this event?')"><i class="fas fa-trash"></i></a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -159,7 +172,10 @@ $events = $db->query("SELECT * FROM events ORDER BY event_start_date DESC")->fet
 
                 <div class="form-group">
                     <label>Banner Image</label>
-                    <input type="file" name="banner" class="form-control-file">
+                    <div>
+                        <img id="bannerPreview" src="../img/event-default.jpg" class="img-fluid mb-2" style="max-height:200px;">
+                    </div>
+                    <input type="file" name="banner" id="bannerInput" class="form-control-file">
                 </div>
             </div>
             <div class="modal-footer">
@@ -184,13 +200,30 @@ $('.edit-btn').click(function() {
     $('#admission').val($(this).data('adm'));
     $('#highlights').val($(this).data('high'));
     $('#current_banner').val($(this).data('banner'));
+    var banner = $(this).data('banner');
+    if (banner) {
+        $('#bannerPreview').attr('src', '../' + banner);
+    } else {
+        $('#bannerPreview').attr('src', '../img/event-default.jpg');
+    }
 });
 
 function clearForm() {
     $('#event_id').val('');
     $('#current_banner').val('');
     $('.modal-body input:not([type=hidden]), .modal-body textarea').val('');
+    $('#bannerPreview').attr('src', '../img/event-default.jpg');
+    $('#bannerInput').val('');
 }
+
+// Preview selected banner image
+$('#bannerInput').on('change', function(e){
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){ $('#bannerPreview').attr('src', ev.target.result); }
+    reader.readAsDataURL(file);
+});
 </script>
 </body>
 </html>

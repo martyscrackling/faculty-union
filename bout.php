@@ -3,7 +3,6 @@
  * 1. Path to your class file
  */
 require_once('class/database.php'); 
-
 /**
  * 2. Create an instance and get the PDO connection
  */
@@ -62,6 +61,8 @@ try {
   <title>About - WMSU Faculty Union</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="icon" href="images/facultyunion.png">
+
   <style>
     body { 
         font-family: 'Montserrat', sans-serif; 
@@ -212,11 +213,7 @@ try {
   <div class="container mt-3">
     <header class="blog-header py-3 mb-4">
       <div class="row flex-nowrap justify-content-between align-items-center">
-        <div class="col-4">
-          <a class="btn btn-outline-dark" href="index.php">
-             &larr; Back to Home
-          </a>
-        </div>
+        
         <!-- <div class="col-4 text-center">
           <strong class="h4">WMSU-FU</strong>
         </div> -->

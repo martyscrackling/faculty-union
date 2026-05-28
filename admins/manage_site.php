@@ -4,8 +4,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../auth/login.php"); exit(); 
 }
 require_once('../class/database.php');
+require_once('sidebar.php');
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Site Identity";
+require_once('navbar.php');
 
 $success = "";
 $error = "";
@@ -68,43 +71,95 @@ if ($db instanceof PDO) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Manage Site Identity</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #f4f7f6; }
-        .card { border-top: 5px solid #8c1d1d; }
-        .btn-maroon { background: #8c1d1d; color: white; }
+        .card { border-top: 6px solid #8c1d1d; border-radius: .5rem; }
+        .btn-maroon { background: #8c1d1d; color: #fff; }
+        .logo-preview { max-height: 120px; object-fit: contain; }
+        .form-label { font-weight: 600; }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <div class="col-md-6 mx-auto">
-        <a href="dashboard.php" class="btn btn-sm btn-outline-secondary mb-3">&larr; Dashboard</a>
-        <div class="card p-4 shadow-sm">
-            <h4 class="mb-4">Site Title & Logo</h4>
-            
-            <?php if($success) echo "<div class='alert alert-success'>$success</div>"; ?>
-            <?php if($error) echo "<div class='alert alert-danger'>$error</div>"; ?>
+<div class="container py-5">
+    <link rel="icon" href="../images/facultyunion.png">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <?php if($success): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <?php echo htmlspecialchars($success); ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                    <?php if($error): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <?php echo htmlspecialchars($error); ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="current_logo" value="<?php echo $settings['logo_path']; ?>">
-                
-                <div class="form-group">
-                    <label>Site Name</label>
-                    <input type="text" name="site_name" class="form-control" value="<?php echo htmlspecialchars($settings['site_name']); ?>" required>
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" name="current_logo" value="<?php echo htmlspecialchars($settings['logo_path']); ?>">
+
+                        <div class="form-group">
+                            <label class="form-label">Site Name</label>
+                            <input type="text" name="site_name" class="form-control" value="<?php echo htmlspecialchars($settings['site_name']); ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Current Logo</label>
+                            <div class="d-flex align-items-center mb-2">
+                                <img id="logoPreview" src="../<?php echo htmlspecialchars($settings['logo_path']); ?>" class="logo-preview img-fluid border p-2 mr-3" alt="logo">
+                                <div class="small text-muted">Recommended: PNG or JPG. Leave empty to keep current logo.</div>
+                            </div>
+
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="logo" name="logo" accept="image/*">
+                                <label class="custom-file-label" for="logo">Choose file</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-maroon btn-block mt-3">Save Changes</button>
+                    </form>
                 </div>
-
-                <div class="form-group">
-                    <label>Current Logo</label><br>
-                    <img src="../<?php echo $settings['logo_path']; ?>" height="60" class="mb-2 border p-1">
-                    <input type="file" name="logo" class="form-control-file">
-                    <small class="text-muted">Leave empty to keep current logo.</small>
-                </div>
-
-                <button type="submit" class="btn btn-maroon btn-block mt-4">Save Changes</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var input = document.getElementById('logo');
+    var label = document.querySelector('label[for="logo"]');
+    var preview = document.getElementById('logoPreview');
+
+    if(input){
+        input.addEventListener('change', function(e){
+            var file = this.files[0];
+            if(file){
+                label.textContent = file.name;
+                var reader = new FileReader();
+                reader.onload = function(ev){ preview.src = ev.target.result; };
+                reader.readAsDataURL(file);
+            } else {
+                label.textContent = 'Choose file';
+                // restore original preview if available
+                preview.src = '../' + '<?php echo addslashes($settings['logo_path']); ?>';
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

@@ -7,8 +7,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 require_once('../class/database.php');
+require_once('sidebar.php');
 $database = new Database();
 $db = $database->getConnection();
+$navtext = "Vision & Objectives";
+require_once('navbar.php');
 
 $success = "";
 
@@ -54,28 +57,42 @@ $objectives = $db->query("SELECT * FROM objectives ORDER BY id ASC")->fetchAll(P
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Vision & Objectives</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <style>
         :root { --maroon: #8c1d1d; --gold: #d4af37; }
-        body { background-color: #f4f7f6; font-family: sans-serif; padding-bottom: 50px; }
+        body { background-color: #f4f7f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
         .btn-maroon { background: var(--maroon); color: white; border: none; font-weight: 600; }
         .btn-maroon:hover { background: var(--gold); color: black; }
-        .section-card { border: none; border-top: 5px solid var(--maroon); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .section-card { border: none; border-top: 5px solid var(--maroon); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); margin-bottom: 28px; }
         .table thead { background: var(--maroon); color: white; }
+        .content{ margin-left:300px; }
+        .table tbody tr:nth-child(odd) { background: #ffffff; }
+        .table tbody tr:nth-child(even) { background: #fbfbfb; }
+        .modal-header { background: var(--maroon); color: #fff; border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .modal-header h5 { margin: 0; font-weight: 600; }
+        .form-control:focus { box-shadow: 0 0 0 0.15rem rgba(140,29,29,0.15); border-color: var(--maroon); }
+        .action-btns .btn { margin-right:6px; }
+        .small-note { color: #6c757d; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
+    <link rel="icon" href="../images/facultyunion.png">
+<div class="container content mt-5">
     <div class="mb-4">
-        <a href="dashboard.php" class="text-muted text-decoration-none"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-        <h2 class="mt-2" style="color: var(--maroon); font-weight: 700;">Manage Vision & Objectives</h2>
+
     </div>
 
-    <?php if($success || isset($_GET['msg'])): ?>
-        <div class="alert alert-success">Action successful!</div>
+    <?php if($success || isset($_GET['msg'])):
+        $msg = $success ?: (isset($_GET['msg']) ? $_GET['msg'] : 'Action successful');
+    ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php echo htmlspecialchars($msg); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     <?php endif; ?>
 
     <div class="card section-card p-4">
@@ -107,12 +124,12 @@ $objectives = $db->query("SELECT * FROM objectives ORDER BY id ASC")->fetchAll(P
                 <tr>
                     <td><?php echo $index + 1; ?></td>
                     <td><?php echo nl2br(htmlspecialchars($obj['content'])); ?></td>
-                    <td>
-                        <button class="btn btn-sm btn-info edit-btn" 
+                    <td class="action-btns">
+                        <button class="btn btn-sm btn-outline-info edit-btn" 
                                 data-id="<?php echo $obj['id']; ?>"
                                 data-content="<?php echo htmlspecialchars($obj['content']); ?>"
-                                data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i></button>
-                        <a href="?delete_obj=<?php echo $obj['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
+                                data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
+                        <a href="?delete_obj=<?php echo $obj['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i> Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

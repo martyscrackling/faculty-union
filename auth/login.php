@@ -63,6 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <title>Login - WMSU Faculty Union</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../images/facultyunion.png">
+
   <style>
     body { font-family: 'Montserrat', sans-serif; background-color: #f8f9fa; height: 100vh; display: flex; align-items: center; justify-content: center; }
     .login-card { background: white; padding: 40px; width: 100%; max-width: 400px; border-top: 8px solid #8c1d1d; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-radius: 8px; }

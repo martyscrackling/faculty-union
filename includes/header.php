@@ -28,7 +28,6 @@ if ($db instanceof PDO) {
     /* Theme Colors: Maroon and Gold */
     #header .sitename {
       color: #8c1d1d !important; /* Maroon Title */
-      font-family: 'Playfair Display', serif;
       font-weight: 700;
       margin-left: 10px;
     }
