@@ -29,12 +29,21 @@ $count_objectives = $db->query("SELECT DISTINCT COUNT(content) FROM objectives")
         .sidebar a:hover { background: rgba(0,0,0,0.2); color: var(--gold); }
         .main-content { margin-left: 250px; padding: 40px; }
         .card-stat { border-left: 5px solid var(--gold); }
+         .header-logo {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 18px auto;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+      }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="p-4 text-center">
+        <img src="../images/facultyunion.png" alt="WMSU Faculty Union logo" class="header-logo">
         <h4 class="font-weight-bold">WMSU-FU</h4>
         <small>Admin Panel</small>
     </div>

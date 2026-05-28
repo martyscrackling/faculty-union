@@ -7,9 +7,77 @@ $db = $database->getConnection();
 
 $msg = "";
 
+function deleteOfficerProfilePicture($relativePath) {
+    if (empty($relativePath)) {
+        return;
+    }
+
+    $absolutePath = dirname(__DIR__) . '/' . ltrim(str_replace('\\', '/', $relativePath), '/');
+    if (is_file($absolutePath)) {
+        unlink($absolutePath);
+    }
+}
+
+function saveOfficerProfilePicture(array $file, $currentPath = '') {
+    if (empty($file['name']) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return $currentPath;
+    }
+
+    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        return $currentPath;
+    }
+
+    if (@getimagesize($file['tmp_name']) === false) {
+        return $currentPath;
+    }
+
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    if (!in_array($extension, $allowedExtensions, true)) {
+        return $currentPath;
+    }
+
+    $uploadDir = __DIR__ . '/uploads/awards/officers/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $fileName = 'officer_' . time() . '_' . uniqid() . '.' . $extension;
+    $targetPath = $uploadDir . $fileName;
+
+    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+        if (!empty($currentPath)) {
+            deleteOfficerProfilePicture($currentPath);
+        }
+
+        return 'admins/uploads/awards/officers/' . $fileName;
+    }
+
+    return $currentPath;
+}
+
+$hasOfficerPhotoColumn = false;
+try {
+    $columnCheck = $db->query("SHOW COLUMNS FROM officers LIKE 'profile_picture'");
+    $hasOfficerPhotoColumn = $columnCheck && $columnCheck->rowCount() > 0;
+
+    if (!$hasOfficerPhotoColumn) {
+        $db->exec("ALTER TABLE officers ADD profile_picture VARCHAR(255) DEFAULT NULL AFTER rank");
+        $hasOfficerPhotoColumn = true;
+    }
+} catch (PDOException $e) {
+    $hasOfficerPhotoColumn = false;
+}
+
 // Handle Delete
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
+    if ($hasOfficerPhotoColumn) {
+        $photoStmt = $db->prepare("SELECT profile_picture FROM officers WHERE id = ?");
+        $photoStmt->execute([$id]);
+        $photoPath = $photoStmt->fetchColumn();
+        deleteOfficerProfilePicture($photoPath);
+    }
     $stmt = $db->prepare("DELETE FROM officers WHERE id = ?");
     $stmt->execute([$id]);
     header("Location: manage_officers.php?msg=Deleted");
@@ -23,9 +91,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_officer'])) {
     $dept = $_POST['department'];
     $cat = $_POST['category'];
     $rank = $_POST['rank'];
+    $photoPath = $hasOfficerPhotoColumn ? saveOfficerProfilePicture($_FILES['profile_picture'] ?? [], '') : null;
 
-    $stmt = $db->prepare("INSERT INTO officers (full_name, position, department_acronym, category, rank) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$name, $pos, $dept, $cat, $rank]);
+    if ($hasOfficerPhotoColumn) {
+        $stmt = $db->prepare("INSERT INTO officers (full_name, position, department_acronym, category, rank, profile_picture) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $pos, $dept, $cat, $rank, $photoPath]);
+    } else {
+        $stmt = $db->prepare("INSERT INTO officers (full_name, position, department_acronym, category, rank) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $pos, $dept, $cat, $rank]);
+    }
     header("Location: manage_officers.php?msg=Added");
     exit();
 }
@@ -38,9 +112,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_officer'])) {
     $dept = $_POST['department'];
     $cat = $_POST['category'];
     $rank = $_POST['rank'];
+    $currentPhoto = $_POST['current_profile_picture'] ?? '';
+    $photoPath = $hasOfficerPhotoColumn ? saveOfficerProfilePicture($_FILES['profile_picture'] ?? [], $currentPhoto) : null;
 
-    $stmt = $db->prepare("UPDATE officers SET full_name = ?, position = ?, department_acronym = ?, category = ?, rank = ? WHERE id = ?");
-    $stmt->execute([$name, $pos, $dept, $cat, $rank, $id]);
+    if ($hasOfficerPhotoColumn) {
+        $stmt = $db->prepare("UPDATE officers SET full_name = ?, position = ?, department_acronym = ?, category = ?, rank = ?, profile_picture = ? WHERE id = ?");
+        $stmt->execute([$name, $pos, $dept, $cat, $rank, $photoPath, $id]);
+    } else {
+        $stmt = $db->prepare("UPDATE officers SET full_name = ?, position = ?, department_acronym = ?, category = ?, rank = ? WHERE id = ?");
+        $stmt->execute([$name, $pos, $dept, $cat, $rank, $id]);
+    }
     header("Location: manage_officers.php?msg=Updated");
     exit();
 }
@@ -73,9 +154,10 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
     <?php endif; ?>
 
     <div class="card shadow-sm">
-        <table class="table mb-0">
+        <table class="table mb-0 align-middle">
             <thead>
                 <tr>
+                    <th>Photo</th>
                     <th>Rank</th>
                     <th>Name</th>
                     <th>Position</th>
@@ -87,6 +169,10 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
             <tbody>
                 <?php foreach($officers as $o): ?>
                 <tr>
+                    <td style="width: 84px;">
+                        <?php $photoSrc = !empty($o['profile_picture']) ? '../' . $o['profile_picture'] : '../images/facultyunion.png'; ?>
+                        <img src="<?php echo htmlspecialchars($photoSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($o['full_name'], ENT_QUOTES, 'UTF-8'); ?>" class="rounded-circle border" style="width:56px;height:56px;object-fit:cover;">
+                    </td>
                     <td><?php echo $o['rank']; ?></td>
                     <td><?php echo htmlspecialchars($o['full_name']); ?></td>
                     <td><?php echo htmlspecialchars($o['position']); ?></td>
@@ -100,6 +186,7 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
                                 data-dept="<?php echo htmlspecialchars($o['department_acronym']); ?>"
                                 data-cat="<?php echo $o['category']; ?>"
                                 data-rank="<?php echo $o['rank']; ?>"
+                                data-photo="<?php echo htmlspecialchars($o['profile_picture'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                 data-toggle="modal" data-target="#editModal">Edit</button>
 
                         <a href="?delete=<?php echo $o['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this officer?')">Delete</a>
@@ -113,7 +200,7 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
 
 <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog">
-        <form class="modal-content" method="POST">
+        <form class="modal-content" method="POST" enctype="multipart/form-data">
             <div class="modal-header"><h5>Add New Officer</h5></div>
             <div class="modal-body">
                 <input type="text" name="full_name" class="form-control mb-2" placeholder="Full Name" required>
@@ -124,6 +211,8 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
                     <option value="Finance">Finance</option>
                 </select>
                 <input type="number" name="rank" class="form-control mb-2" placeholder="Rank (Order)" required>
+                <label class="small font-weight-bold mt-2">Profile Picture</label>
+                <input type="file" name="profile_picture" class="form-control-file" accept="image/*">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -135,10 +224,11 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
 
 <div class="modal fade" id="editModal" tabindex="-1">
     <div class="modal-dialog">
-        <form class="modal-content" method="POST">
+        <form class="modal-content" method="POST" enctype="multipart/form-data">
             <div class="modal-header"><h5>Edit Officer</h5></div>
             <div class="modal-body">
                 <input type="hidden" name="id" id="edit_id">
+            <input type="hidden" name="current_profile_picture" id="current_profile_picture">
                 <label class="small font-weight-bold">Full Name</label>
                 <input type="text" name="full_name" id="edit_name" class="form-control mb-2" required>
                 
@@ -156,6 +246,12 @@ $officers = $db->query("SELECT * FROM officers ORDER BY rank ASC")->fetchAll(PDO
                 
                 <label class="small font-weight-bold">Rank</label>
                 <input type="number" name="rank" id="edit_rank" class="form-control mb-2" required>
+
+                <label class="small font-weight-bold mt-2">Profile Picture</label>
+                <input type="file" name="profile_picture" class="form-control-file" accept="image/*">
+                <div class="mt-3">
+                    <img id="edit_photo_preview" src="../images/facultyunion.png" alt="Current profile picture" class="rounded-circle border" style="width:72px;height:72px;object-fit:cover;">
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -177,6 +273,9 @@ $('.edit-btn').on('click', function() {
     $('#edit_dept').val($(this).data('dept'));
     $('#edit_cat').val($(this).data('cat'));
     $('#edit_rank').val($(this).data('rank'));
+    $('#current_profile_picture').val($(this).data('photo') || '');
+    const photo = $(this).data('photo');
+    $('#edit_photo_preview').attr('src', photo ? '../' + photo : '../images/facultyunion.png');
 });
 </script>
 

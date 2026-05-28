@@ -195,7 +195,8 @@ CREATE TABLE `officers` (
   `position` varchar(100) NOT NULL,
   `department_acronym` varchar(20) DEFAULT NULL,
   `category` enum('Executive','Finance') DEFAULT 'Executive',
-  `rank` int(11) DEFAULT 0
+  `rank` int(11) DEFAULT 0,
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

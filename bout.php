@@ -48,6 +48,10 @@ try {
 } catch (PDOException $e) {
     die("Query failed: " . $e->getMessage());
 }
+
+  function resolveOfficerPhoto($path) {
+    return !empty($path) ? $path : 'images/facultyunion.png';
+  }
 ?>
 
 <!doctype html>
@@ -85,6 +89,15 @@ try {
         color: white; 
         text-align: center; 
     }
+
+      .header-logo {
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 18px auto;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+      }
 
     .artistic-title { 
         font-family: 'Playfair Display', serif; 
@@ -124,12 +137,36 @@ try {
         padding: 15px; 
         margin-bottom: 15px; 
         transition: 0.3s; 
+      display: flex; 
+      align-items: center; 
+      gap: 15px; 
     }
 
     .person-card:hover { 
         transform: translateX(8px); 
         background: #fff; 
         box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }
+
+    .officer-avatar { 
+      width: 76px; 
+      height: 76px; 
+      border-radius: 50%; 
+      overflow: hidden; 
+      flex: 0 0 76px; 
+      border: 3px solid #e9d7a5; 
+      background: #f7f4ec; 
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08); 
+    }
+
+    .officer-avatar img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+
+    .person-details { 
+      min-width: 0; 
     }
 
     .person-name { font-weight: bold; color: #8c1d1d; display: block; }
@@ -193,6 +230,7 @@ try {
         background-repeat: no-repeat; 
         height: 450px;">
       <div class="header-overlay">
+        <img src="images/facultyunion.png" alt="WMSU Faculty Union logo" class="header-logo">
         <h1 class="artistic-title display-4">WMSU Faculty Union</h1>
         <p class="lead subtitle">United for Progress, Dedicated to Service</p>
       </div>
@@ -233,9 +271,14 @@ try {
                 <div class="col-md-6">
                   <?php foreach ($column as $officer): ?>
                     <div class="person-card">
-                      <span class="person-name"><?php echo htmlspecialchars($officer['position']); ?></span> 
-                      <?php echo htmlspecialchars($officer['full_name']); ?> 
-                      (<?php echo htmlspecialchars($officer['department_acronym']); ?>)
+                      <div class="officer-avatar">
+                        <img src="<?php echo htmlspecialchars(resolveOfficerPhoto($officer['profile_picture'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($officer['full_name'], ENT_QUOTES, 'UTF-8'); ?>">
+                      </div>
+                      <div class="person-details">
+                        <span class="person-name"><?php echo htmlspecialchars($officer['position']); ?></span> 
+                        <?php echo htmlspecialchars($officer['full_name']); ?> 
+                        (<?php echo htmlspecialchars($officer['department_acronym']); ?>)
+                      </div>
                     </div>
                   <?php endforeach; ?>
                 </div>
@@ -247,9 +290,14 @@ try {
               <?php foreach($fin_rows as $fin): ?>
                 <div class="col-md-6">
                   <div class="person-card">
-                    <span class="person-name"><?php echo htmlspecialchars($fin['position']); ?></span> 
-                    <?php echo htmlspecialchars($fin['full_name']); ?> 
-                    (<?php echo htmlspecialchars($fin['department_acronym']); ?>)
+                    <div class="officer-avatar">
+                      <img src="<?php echo htmlspecialchars(resolveOfficerPhoto($fin['profile_picture'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($fin['full_name'], ENT_QUOTES, 'UTF-8'); ?>">
+                    </div>
+                    <div class="person-details">
+                      <span class="person-name"><?php echo htmlspecialchars($fin['position']); ?></span> 
+                      <?php echo htmlspecialchars($fin['full_name']); ?> 
+                      (<?php echo htmlspecialchars($fin['department_acronym']); ?>)
+                    </div>
                   </div>
                 </div>
               <?php endforeach; ?>

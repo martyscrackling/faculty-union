@@ -70,11 +70,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     .btn-login { background-color: #8c1d1d; color: white; font-weight: 600; text-transform: uppercase; border: none; padding: 12px; transition: 0.3s; }
     .btn-login:hover { background-color: #d4af37; color: black; }
     .alert-custom { background-color: #fdf2f2; color: #8c1d1d; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 20px; border-radius: 4px; text-align: center; }
+         .header-logo {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 18px auto;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+      }
+
   </style>
 </head>
 <body>
   <div class="login-card">
     <div class="login-header">
+        <img src="../images/facultyunion.png" alt="WMSU Faculty Union logo" class="header-logo">
       <h2>WMSU-FU</h2>
       <p class="text-center text-muted">Faculty Union Portal</p>
     </div>
