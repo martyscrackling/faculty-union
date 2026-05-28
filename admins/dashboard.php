@@ -171,7 +171,7 @@ date_default_timezone_set("Asia/Manila");
             <div class="greeting"><?php echo $greeting; ?></div>
             <div class="date-display"><?php echo $current_date; ?></div>
             <div class="home mt-3">
-                <h6><a href="../dashboard/descd.php" class="homelink">Go to homepage</a></h6>
+                <h6><a href="../index.php" class="homelink">Go to homepage</a></h6>
             </div>
         </div>
         
