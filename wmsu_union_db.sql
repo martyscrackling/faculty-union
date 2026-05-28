@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2026 at 11:52 PM
--- Server version: 11.7.2-MariaDB
+-- Generation Time: May 28, 2026 at 08:25 PM
+-- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -20,9 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `wmsu_union_db`
 --
-
-CREATE DATABASE IF NOT EXISTS `wmsu_union_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `wmsu_union_db`;
 
 -- --------------------------------------------------------
 
@@ -203,16 +200,17 @@ CREATE TABLE `officers` (
 -- Dumping data for table `officers`
 --
 
-INSERT INTO `officers` (`id`, `full_name`, `position`, `department_acronym`, `category`, `rank`) VALUES
-(1, 'Dr. Adrian P. Semorlan', 'President', 'CLA', 'Executive', 1),
-(2, 'Prof. Harry Subibi', 'Vice President', 'CTE', 'Executive', 2),
-(3, 'Prof. Evelyn Angeles', 'Secretary', 'COE', 'Executive', 3),
-(4, 'Dr. Cheryl Barredo', 'Treasurer', 'CLA', 'Executive', 4),
-(5, 'Prof. Erwin Alonzo', 'Auditor', 'CSM', 'Executive', 5),
-(6, 'Prof. Victor Pagal', 'PIO', 'ESU', 'Executive', 6),
-(7, 'Dr. Mervyn Garingo', 'Project Manager', 'CTE', 'Executive', 7),
-(8, 'Prof. Patrick Brown', 'Finance Officer I', 'CHE', 'Finance', 8),
-(9, 'Prof. Mai Gonzales', 'Finance Officer II', 'CN', 'Finance', 9);
+INSERT INTO `officers` (`id`, `full_name`, `position`, `department_acronym`, `category`, `rank`, `profile_picture`) VALUES
+(1, 'Dr. Adrian P. Semorlan', 'President', 'CLA', 'Executive', 1, 'admins/uploads/awards/officers/officer_1779950873_6a17e519a8765.jpg'),
+(2, 'Prof. Harry Subibi', 'Vice President', 'CTE', 'Executive', 2, 'admins/uploads/awards/officers/officer_1779976686_6a1849eed6191.jpg'),
+(3, 'Prof. Evelyn Angeles', 'Secretary', 'COE', 'Executive', 3, NULL),
+(4, 'Dr. Cheryl Barredo', 'Treasurer', 'CLA', 'Executive', 4, NULL),
+(5, 'Prof. Erwin Alonzo', 'Auditor', 'CSM', 'Executive', 5, NULL),
+(6, 'Prof. Victor Pagal', 'PIO', 'ESU', 'Executive', 6, NULL),
+(7, 'Dr. Mervyn Garingo', 'Project Manager', 'CTE', 'Executive', 7, NULL),
+(8, 'Prof. Patrick Brown', 'Finance Officer I', 'CHE', 'Finance', 8, NULL),
+(9, 'Prof. Mai Gonzales', 'Finance Officer II', 'CN', 'Finance', 9, NULL),
+(10, 'Sheldon Cooper', 'Supervisor', 'CCJE', 'Finance', 2, NULL);
 
 -- --------------------------------------------------------
 
@@ -232,7 +230,7 @@ CREATE TABLE `site_settings` (
 --
 
 INSERT INTO `site_settings` (`id`, `site_name`, `logo_path`, `updated_at`) VALUES
-(1, 'Faculty Union', 'img/1776808510_Screenshot 2025-04-27 175224.png', '2026-04-22 08:14:58');
+(1, 'Faculty Union', 'img/1779951143_facultyunion.png', '2026-05-28 06:52:23');
 
 -- --------------------------------------------------------
 
@@ -440,7 +438,7 @@ ALTER TABLE `objectives`
 -- AUTO_INCREMENT for table `officers`
 --
 ALTER TABLE `officers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `site_settings`
